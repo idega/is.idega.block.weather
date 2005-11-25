@@ -117,4 +117,8 @@ public class IcelandicWeatherBusiness implements WeatherBusiness {
 		}
 		return new ArrayList();
 	}
+
+	public Collection getWeatherStations() {
+		return getAllWeatherData();
+	}
 }
