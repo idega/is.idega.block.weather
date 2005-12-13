@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import com.idega.block.weather.business.WeatherBusiness;
+import com.idega.block.weather.business.WeatherConstants;
 import com.idega.block.weather.business.WeatherData;
 import com.idega.util.IWTimestamp;
 import com.idega.xml.XMLElement;
@@ -120,5 +121,13 @@ public class IcelandicWeatherBusiness implements WeatherBusiness {
 
 	public Collection getWeatherStations() {
 		return getAllWeatherData();
+	}
+	
+	public String getTemperatureSign() {
+		return WeatherConstants.CELCIUS;
+	}
+	
+	public String getWindSpeedUnit() {
+		return WeatherConstants.METERS_PER_SECOND;
 	}
 }
