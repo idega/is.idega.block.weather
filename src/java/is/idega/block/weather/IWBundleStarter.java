@@ -32,9 +32,9 @@ public class IWBundleStarter implements IWBundleStartable, ActionListener {
 
 	public void start(IWBundle starterBundle) {
 		setURL();
-		timer = new EventTimer(EventTimer.THREAD_SLEEP_24_HOURS/6,IW_WEATHER_TIMER);
-		timer.addActionListener(this);
-		timer.start();
+		this.timer = new EventTimer(EventTimer.THREAD_SLEEP_24_HOURS/6,IW_WEATHER_TIMER);
+		this.timer.addActionListener(this);
+		this.timer.start();
 	}
 
 	/**
@@ -48,13 +48,13 @@ public class IWBundleStarter implements IWBundleStartable, ActionListener {
 			ICApplicationBindingHome ibHome = (ICApplicationBindingHome) IDOLookup.getHome(ICApplicationBinding.class);
 			try {
 				ICApplicationBinding ab = ibHome.findByPrimaryKey(KEY);
-				URL = ab.getValue();
+				this.URL = ab.getValue();
 			}
 			catch (FinderException e) {
 				try {
 					ICApplicationBinding ab = ibHome.create();
 					ab.setKey(KEY);
-					ab.setValue(URL);
+					ab.setValue(this.URL);
 					ab.setBindingType("weather_block_binding");
 					ab.store();
 				}
@@ -74,7 +74,7 @@ public class IWBundleStarter implements IWBundleStartable, ActionListener {
 	public void actionPerformed(ActionEvent event) {
 		if (event.getActionCommand().equalsIgnoreCase(IW_WEATHER_TIMER)) {
 			WeatherBusiness business = IcelandicWeatherBusiness.getInstance();
-			business.parseXML(URL);
+			business.parseXML(this.URL);
 			System.out.println("Done parsing weather data...");
 		}
 	}
