@@ -3,11 +3,11 @@
 <project>
   <extend>${base.project.dir}/block-dependencies.xml</extend>
   <pomVersion>3</pomVersion>
-  <name>idegaWeb Weather Block</name>
+  <name>idegaWeb Icelandic Weather Block</name>
   <artifactId>is.idega.block.weather</artifactId>
-  <currentVersion>1.0-SNAPSHOT</currentVersion>
+  <currentVersion>3.1.0</currentVersion>
   <inceptionYear>2003</inceptionYear>
-  <shortDescription>Weather</shortDescription>
+  <shortDescription>Weather block with extensions for the Icelandic Weather Agency</shortDescription>
   <versions>
   </versions>
   <branches/>
@@ -24,8 +24,7 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.core</artifactId>
-      <!--<version>1.9.1</version>-->
-      <version>SNAPSHOT</version>
+      <version>3.1.0</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
@@ -35,8 +34,7 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.block.weather</artifactId>
-      <!--<version>1.0</version>-->
-      <version>SNAPSHOT</version>
+      <version>3.1.0</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
