@@ -1,2 +1,3 @@
 iw.component.is.idega.block.weather.presentation.IcelandicWeather.name=IcelandicWeather
+no_data_found_for_station=No data found for weather station
 no_station_selected=No weather station selected
