@@ -22,22 +22,21 @@ import com.idega.xml.XMLElement;
 import com.idega.xml.XMLException;
 import com.idega.xml.XMLParser;
 
-
 public class IcelandicWeatherBusiness implements WeatherBusiness {
 
 	private static IcelandicWeatherBusiness instance;
 	private static Map weatherMap;
-	
+
 	private IcelandicWeatherBusiness() {
 	}
-	
+
 	public static IcelandicWeatherBusiness getInstance() {
 		if (instance == null) {
 			instance = new IcelandicWeatherBusiness();
 		}
 		return instance;
 	}
-	
+
 	public Map parseXML(String URL) {
 		XMLParser parser = new XMLParser();
 		XMLElement rootElement = null;
@@ -45,10 +44,10 @@ public class IcelandicWeatherBusiness implements WeatherBusiness {
 			rootElement = parser.parse(URL).getRootElement();
 		}
 		catch (XMLException e) {
-				e.printStackTrace(System.err);
+			e.printStackTrace(System.err);
 			rootElement = null;
 		}
-		
+
 		if (rootElement != null) {
 			Collection children = rootElement.getChildren("Stod");
 			Iterator iter = children.iterator();
@@ -56,22 +55,22 @@ public class IcelandicWeatherBusiness implements WeatherBusiness {
 				XMLElement element = (XMLElement) iter.next();
 				String name = element.getAttribute("nafn").getValue();
 				String id = element.getAttribute("wmonr").getValue();
-				
+
 				XMLElement data = element.getChild("Athugun");
 				String time = data.getAttribute("timi").getValue();
-				
+
 				WeatherData weather = getWeather(id);
 				if (weather == null) {
 					weather = new WeatherData();
 				}
-				
+
 				weather.setID(id);
 				weather.setName(name);
 				weather.setTimestamp(new IWTimestamp(time).getTimestamp());
 
 				String temperature = data.getChild("Hitastig").getValue();
 				String windspeed = data.getChild("Vindstyrkur").getValue();
-				
+
 				weather.setTemperature(new Float(temperature));
 				weather.setWindspeed(new Float(windspeed));
 
@@ -82,19 +81,22 @@ public class IcelandicWeatherBusiness implements WeatherBusiness {
 					weather.setWindDirection(new Float(windDirection));
 					weather.setWindDirectionTxt(windDirectionTxt);
 				}
-				
-				if (data.getChild("Skyjahula") != null) {
+
+				if (data.getChild("Vedur") != null) {
 					String code = data.getChild("Vedur").getAttribute("kodi").getValue();
 					String codeURL = data.getChild("Vedur").getAttribute("url").getValue();
 					String description = data.getChild("Vedur").getValue();
-					String clearance = data.getChild("Skyggni").getValue();
 
 					weather.setWeatherDescription(description);
-					weather.setClearance(clearance);
 					weather.setWeatherCode(code);
 					weather.setWeatherCodeURL(codeURL);
 				}
-				
+
+				if (data.getChild("Skyggni") != null) {
+					String clearance = data.getChild("Skyggni").getValue();
+					weather.setClearance(clearance);
+				}
+
 				if (weatherMap == null) {
 					weatherMap = new HashMap();
 				}
@@ -111,7 +113,7 @@ public class IcelandicWeatherBusiness implements WeatherBusiness {
 		}
 		return null;
 	}
-	
+
 	public Collection getAllWeatherData() {
 		if (weatherMap != null) {
 			return weatherMap.values();
@@ -122,11 +124,11 @@ public class IcelandicWeatherBusiness implements WeatherBusiness {
 	public Collection getWeatherStations() {
 		return getAllWeatherData();
 	}
-	
+
 	public String getTemperatureSign() {
 		return WeatherConstants.CELCIUS;
 	}
-	
+
 	public String getWindSpeedUnit() {
 		return WeatherConstants.METERS_PER_SECOND;
 	}
