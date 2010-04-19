@@ -43,11 +43,4 @@ public class WeatherStationHandler implements ICPropertyHandler {
 
 	public void onUpdate(String[] values, IWContext iwc) {
 	}
-
-	public PresentationObject getHandlerObject(String name, String stringValue,
-			IWContext iwc, boolean oldGenerationHandler, String instanceId,
-			String method) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }
