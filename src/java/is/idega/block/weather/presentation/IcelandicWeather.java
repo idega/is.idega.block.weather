@@ -17,6 +17,7 @@ import com.idega.block.weather.presentation.AbstractWeather;
 public class IcelandicWeather extends AbstractWeather {
 
 	protected static final String IW_ICELANDIC_WEATHER_BUNDLE_IDENTIFIER = "is.idega.block.weather";
+	
 	protected WeatherBusiness getBusiness() {
 		return IcelandicWeatherBusiness.getInstance();
 	}
