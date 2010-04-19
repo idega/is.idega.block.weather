@@ -10,55 +10,62 @@
 package is.idega.block.weather;
 
 import is.idega.block.weather.business.IcelandicWeatherBusiness;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import javax.ejb.CreateException;
+import javax.ejb.FinderException;
 import com.idega.block.weather.business.WeatherBusiness;
-import com.idega.idegaweb.IWApplicationContext;
+import com.idega.core.data.ICApplicationBinding;
+import com.idega.core.data.ICApplicationBindingHome;
+import com.idega.data.IDOLookup;
+import com.idega.data.IDOLookupException;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWBundleStartable;
-import com.idega.servlet.filter.IWBundleResourceFilter;
 import com.idega.util.EventTimer;
 
 
 public class IWBundleStarter implements IWBundleStartable, ActionListener {
 
 	private EventTimer timer;
-	public static final String IW_WEATHER_TIMER = "iw_weather_timer_is";
-	private String URL = "http://xmlweather.vedur.is/?op_w=xml&type=obs&lang=is&anytime=1&time=3h&view=xml&params=V;D;F;W;T&ids=";
+	public static final String IW_WEATHER_TIMER = "iw_weather_timer";
+	private String URL = "http://beljandi.vedur.is/serthj/askrift/ath?notandi=laddi&lykilord=bakki";
 
 	public void start(IWBundle starterBundle) {
-		IWBundleResourceFilter.copyAllFilesFromJarDirectory(starterBundle.getApplication(), starterBundle, "/resources/");
-
-		setURL(starterBundle.getApplication().getIWApplicationContext());
-		this.timer = new EventTimer(EventTimer.THREAD_SLEEP_24_HOURS / 8,IW_WEATHER_TIMER);
+		setURL();
+		this.timer = new EventTimer(EventTimer.THREAD_SLEEP_24_HOURS/6,IW_WEATHER_TIMER);
 		this.timer.addActionListener(this);
 		this.timer.start();
 	}
 
 	/**
 	 * <p>
-	 * Get the URL to the weather information.
+	 * Get the url to the weather information. Searches the ICApplicationBinding db table.
 	 * </p>
 	 */
-	private void setURL(IWApplicationContext iwac) {
-		String KEY = "weather.url.is";
-		String IDS = "weather.stations.is";
-		
-		String xmlURL = iwac.getApplicationSettings().getProperty(KEY);
-		if (xmlURL == null) {
-			iwac.getApplicationSettings().setProperty(KEY, this.URL);
-			xmlURL = this.URL;
+	private void setURL() {
+		try {
+			String KEY = "ICELANDIC_WEATHER_URL";
+			ICApplicationBindingHome ibHome = (ICApplicationBindingHome) IDOLookup.getHome(ICApplicationBinding.class);
+			try {
+				ICApplicationBinding ab = ibHome.findByPrimaryKey(KEY);
+				this.URL = ab.getValue();
+			}
+			catch (FinderException e) {
+				try {
+					ICApplicationBinding ab = ibHome.create();
+					ab.setKey(KEY);
+					ab.setValue(this.URL);
+					ab.setBindingType("weather_block_binding");
+					ab.store();
+				}
+				catch (CreateException e1) {
+					e1.printStackTrace();
+				}
+			}
 		}
-		
-		String ids = iwac.getApplicationSettings().getProperty(IDS);
-		if (ids == null) {
-			iwac.getApplicationSettings().setProperty(IDS, "1");
-			ids = "1";
+		catch (IDOLookupException e) {
+			e.printStackTrace();
 		}
-		
-		this.URL = xmlURL + ids;
 	}
 
 	public void stop(IWBundle starterBundle) {

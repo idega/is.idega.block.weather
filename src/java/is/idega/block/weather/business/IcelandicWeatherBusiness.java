@@ -14,12 +14,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
 import com.idega.block.weather.business.WeatherBusiness;
 import com.idega.block.weather.business.WeatherConstants;
 import com.idega.block.weather.business.WeatherData;
 import com.idega.util.IWTimestamp;
-import com.idega.util.StringHandler;
 import com.idega.xml.XMLElement;
 import com.idega.xml.XMLException;
 import com.idega.xml.XMLParser;
@@ -38,13 +36,6 @@ public class IcelandicWeatherBusiness implements WeatherBusiness {
 		}
 		return instance;
 	}
-	
-	public static void main(String[] args) {
-		String URL = "http://xmlweather.vedur.is/?op_w=xml&type=obs&lang=is&anytime=1&time=3h&view=xml&params=V;D;F;W;T;FX;FG;N;P;RH;SNC;SND;SED;RTE;TD;R&ids=1";
-		
-		Map map = getInstance().parseXML(URL);
-		System.out.println(map);
-	}
 
 	public Map parseXML(String URL) {
 		XMLParser parser = new XMLParser();
@@ -58,15 +49,15 @@ public class IcelandicWeatherBusiness implements WeatherBusiness {
 		}
 
 		if (rootElement != null) {
-			Collection children = rootElement.getChildren("station");
+			Collection children = rootElement.getChildren("Stod");
 			Iterator iter = children.iterator();
 			while (iter.hasNext()) {
 				XMLElement element = (XMLElement) iter.next();
-				
-				String name = element.getChild("name").getValue();
-				String id = element.getAttribute("id").getValue();
+				String name = element.getAttribute("nafn").getValue();
+				String id = element.getAttribute("wmonr").getValue();
 
-				String time = element.getChild("time").getValue();
+				XMLElement data = element.getChild("Athugun");
+				String time = data.getAttribute("timi").getValue();
 
 				WeatherData weather = getWeather(id);
 				if (weather == null) {
@@ -77,28 +68,32 @@ public class IcelandicWeatherBusiness implements WeatherBusiness {
 				weather.setName(name);
 				weather.setTimestamp(new IWTimestamp(time).getTimestamp());
 
-				String temperature = element.getChild("T").getValue();
-				weather.setTemperature(new Float(temperature.replaceAll(",", ".")));
+				String temperature = data.getChild("Hitastig").getValue();
+				String windspeed = data.getChild("Vindstyrkur").getValue();
 
-				String windspeed = element.getChild("F").getValue();
-				weather.setWindspeed(new Float(windspeed.replaceAll(",", ".")));
+				weather.setTemperature(new Float(temperature));
+				weather.setWindspeed(new Float(windspeed));
 
-				String d = element.getChild("D").getValue();
-				if (d != null && d.length() > 0) {
-					String windDirection = d;
-					weather.setWindDirection(windDirection);
+				if (data.getChild("Vindatt") != null) {
+					String windDirection = data.getChild("Vindatt").getValue();
+					String windDirectionTxt = data.getChild("VindattTxt").getValue();
+
+					weather.setWindDirection(new Float(windDirection));
+					weather.setWindDirectionTxt(windDirectionTxt);
 				}
 
-				String w = element.getChild("W").getValue();
-				if (w != null && w.length() > 0) {
-					String description = w;
+				if (data.getChild("Vedur") != null) {
+					String code = data.getChild("Vedur").getAttribute("kodi").getValue();
+					String codeURL = data.getChild("Vedur").getAttribute("url").getValue();
+					String description = data.getChild("Vedur").getValue();
+
 					weather.setWeatherDescription(description);
-					weather.setWeatherCode(StringHandler.stripNonRomanCharacters(description).toLowerCase());
+					weather.setWeatherCode(code);
+					weather.setWeatherCodeURL(codeURL);
 				}
 
-				String v = element.getChild("V").getValue();
-				if (v != null && v.length() > 0) {
-					String clearance = v;
+				if (data.getChild("Skyggni") != null) {
+					String clearance = data.getChild("Skyggni").getValue();
 					weather.setClearance(clearance);
 				}
 
