@@ -38,14 +38,15 @@ public class IcelandicWeatherBusiness implements WeatherBusiness {
 		}
 		return instance;
 	}
-	
+
 	public static void main(String[] args) {
 		String URL = "http://xmlweather.vedur.is/?op_w=xml&type=obs&lang=is&anytime=1&time=3h&view=xml&params=V;D;F;W;T;FX;FG;N;P;RH;SNC;SND;SED;RTE;TD;R&ids=1";
-		
+
 		Map map = getInstance().parseXML(URL);
 		System.out.println(map);
 	}
 
+	@Override
 	public Map parseXML(String URL) {
 		XMLParser parser = new XMLParser();
 		XMLElement rootElement = null;
@@ -61,57 +62,60 @@ public class IcelandicWeatherBusiness implements WeatherBusiness {
 			Collection children = rootElement.getChildren("station");
 			Iterator iter = children.iterator();
 			while (iter.hasNext()) {
-				XMLElement element = (XMLElement) iter.next();
-				
-				String name = element.getChild("name").getValue();
-				String id = element.getAttribute("id").getValue();
+				try {
+					XMLElement element = (XMLElement) iter.next();
 
-				String time = element.getChild("time").getValue();
+					String name = element.getChild("name").getValue();
+					String id = element.getAttribute("id").getValue();
 
-				WeatherData weather = getWeather(id);
-				if (weather == null) {
-					weather = new WeatherData();
-				}
+					String time = element.getChild("time").getValue();
 
-				weather.setID(id);
-				weather.setName(name);
-				weather.setTimestamp(new IWTimestamp(time).getTimestamp());
+					WeatherData weather = getWeather(id);
+					if (weather == null) {
+						weather = new WeatherData();
+					}
 
-				String temperature = element.getChild("T").getValue();
-				weather.setTemperature(new Float(temperature.replaceAll(",", ".")));
+					weather.setID(id);
+					weather.setName(name);
+					weather.setTimestamp(new IWTimestamp(time).getTimestamp());
 
-				String windspeed = element.getChild("F").getValue();
-				weather.setWindspeed(new Float(windspeed.replaceAll(",", ".")));
+					String temperature = element.getChild("T").getValue();
+					weather.setTemperature(new Float(temperature.replaceAll(",", ".")));
 
-				String d = element.getChild("D").getValue();
-				if (d != null && d.length() > 0) {
-					String windDirection = d;
-					weather.setWindDirection(windDirection);
-				}
+					String windspeed = element.getChild("F").getValue();
+					weather.setWindspeed(new Float(windspeed.replaceAll(",", ".")));
 
-				String w = element.getChild("W").getValue();
-				if (w != null && w.length() > 0) {
-					String description = w;
-					weather.setWeatherDescription(description);
-					weather.setWeatherCode(StringHandler.stripNonRomanCharacters(description).toLowerCase());
-				}
+					String d = element.getChild("D").getValue();
+					if (d != null && d.length() > 0) {
+						String windDirection = d;
+						weather.setWindDirection(windDirection);
+					}
 
-				String v = element.getChild("V").getValue();
-				if (v != null && v.length() > 0) {
-					String clearance = v;
-					weather.setClearance(clearance);
-				}
+					String w = element.getChild("W").getValue();
+					if (w != null && w.length() > 0) {
+						String description = w;
+						weather.setWeatherDescription(description);
+						weather.setWeatherCode(StringHandler.stripNonRomanCharacters(description).toLowerCase());
+					}
 
-				if (weatherMap == null) {
-					weatherMap = new HashMap();
-				}
-				weatherMap.put(id, weather);
+					String v = element.getChild("V").getValue();
+					if (v != null && v.length() > 0) {
+						String clearance = v;
+						weather.setClearance(clearance);
+					}
+
+					if (weatherMap == null) {
+						weatherMap = new HashMap();
+					}
+					weatherMap.put(id, weather);
+				} catch (Exception e) {}
 			}
 		}
 
 		return weatherMap;
 	}
 
+	@Override
 	public WeatherData getWeather(String id) {
 		if (weatherMap != null) {
 			return (WeatherData) weatherMap.get(id);
@@ -126,14 +130,17 @@ public class IcelandicWeatherBusiness implements WeatherBusiness {
 		return new ArrayList();
 	}
 
+	@Override
 	public Collection getWeatherStations() {
 		return getAllWeatherData();
 	}
 
+	@Override
 	public String getTemperatureSign() {
 		return WeatherConstants.CELCIUS;
 	}
 
+	@Override
 	public String getWindSpeedUnit() {
 		return WeatherConstants.METERS_PER_SECOND;
 	}
